@@ -2,6 +2,7 @@ require 'oystercard'
 
 $limit = Oystercard::LIMIT
 $minimum = Oystercard::MINIMUM
+$example_station = 'example station'
 
 describe Oystercard do
   
@@ -27,7 +28,7 @@ describe Oystercard do
 
   describe '#deduct' do
     it 'deducts money from balance when customer travels' do
-      subject.touch_out
+      subject.touch_out($example_station)
       expect(subject.balance).to eq $limit - $minimum
     end
   end
@@ -48,12 +49,12 @@ describe Oystercard do
 
   describe '#touch_out' do
     it 'deducts the minimum amount from the balance when touched out' do
-      expect{subject.touch_out}.to change{subject.balance}.by -$minimum
+      expect{subject.touch_out($example_station)}.to change{subject.balance}.by -$minimum
     end
 
     it 'forgets entry_station when journey ends' do
       subject.touch_in("Victoria")
-      expect{ subject.touch_out }.to change{subject.entry_station}.to nil
+      expect{ subject.touch_out($example_station) }.to change{subject.entry_station}.to nil
     end
   end
 
@@ -64,7 +65,7 @@ describe Oystercard do
 
     # not sure if this is better nested or unnested?
     # the idea is to DRY out the touch ins from the
-    # tests so maybe the nest hurts readability
+    # tests so maybe the nest hurts readability (Comment from Graeme)
 
     describe '#in_journey after a card is touched in' do      
       before(:each) do
@@ -76,9 +77,21 @@ describe Oystercard do
       end
   
      it 'still works after card #touch_in then #touch_out' do
-        subject.touch_out
+        subject.touch_out($example_station)
         expect(subject).not_to be_in_journey
       end      
+    end
+  end
+
+  describe "#journey_history" do
+    it 'A new instance of Oystercard will have an empty journey_history' do
+      expect(subject.journey_history).to eq []
+    end
+
+    it 'can hold journeys in the @journey_history instance var and return them' do
+      subject.touch_in("London Bridge")
+      subject.touch_out("Victoria")
+      expect(subject.journey_history).to eq [{:in => 'London Bridge', :out => 'Victoria'}]
     end
   end
 end
