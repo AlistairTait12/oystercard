@@ -1,4 +1,6 @@
 require 'oystercard'
+require 'station'
+require 'journey'
 
 $limit = Oystercard::LIMIT
 $minimum = Oystercard::MINIMUM
@@ -28,6 +30,7 @@ describe Oystercard do
 
   describe '#deduct' do
     it 'deducts money from balance when customer travels' do
+      subject.touch_in($example_station)
       subject.touch_out($example_station)
       expect(subject.balance).to eq $limit - $minimum
     end
@@ -43,7 +46,7 @@ describe Oystercard do
       station = double
       allow(station).to receive(:name) { "Victoria" }
       subject.touch_in(station.name)
-      expect(subject.entry_station).to eq station.name
+      expect(subject.current_journey.).to eq station.name
     end
   end
 
